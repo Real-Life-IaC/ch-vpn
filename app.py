@@ -3,57 +3,38 @@ import aws_cdk as cdk
 from constructs_package.constants import AwsAccountId
 from constructs_package.constants import AwsRegion
 from constructs_package.constants import AwsStage
-from infra.stack import PlatformStack
+from infra.stack import VpnStack
 
 
 app = cdk.App()
 
-PlatformStack(
+VpnStack(
     scope=app,
-    id=f"Platform-{AwsStage.SANDBOX}",
-    env=cdk.Environment(
-        account=AwsAccountId.SANDBOX, region=AwsRegion.US_EAST_1
-    ),
-    stage=AwsStage.SANDBOX,
+    id=f"Vpn-{AwsStage.SANDBOX}",
+    env=cdk.Environment(account=AwsAccountId.SANDBOX, region=AwsRegion.US_EAST_1),
     cidr_block="10.112.0.0/16",
-    max_azs=2,
-    nat_gateways=1,
 )
 
-PlatformStack(
+VpnStack(
     scope=app,
-    id=f"Platform-{AwsStage.STAGING}",
-    env=cdk.Environment(
-        account=AwsAccountId.STAGING, region=AwsRegion.US_EAST_1
-    ),
-    stage=AwsStage.STAGING,
+    id=f"Vpn-{AwsStage.STAGING}",
+    env=cdk.Environment(account=AwsAccountId.STAGING, region=AwsRegion.US_EAST_1),
     cidr_block="10.80.0.0/16",
-    max_azs=2,
-    nat_gateways=1,
-)
+ )
 
-PlatformStack(
+VpnStack(
     scope=app,
-    id=f"Platform-{AwsStage.PRODUCTION}",
-    env=cdk.Environment(
-        account=AwsAccountId.PRODUCTION, region=AwsRegion.US_EAST_1
-    ),
-    stage=AwsStage.PRODUCTION,
+    id=f"Vpn-{AwsStage.PRODUCTION}",
+    env=cdk.Environment(account=AwsAccountId.PRODUCTION, region=AwsRegion.US_EAST_1),
     cidr_block="10.16.0.0/16",
-    max_azs=3,
-    nat_gateways=1,  # In real-life #NATs = #AZs
-)
+ )
 
-PlatformStack(
+VpnStack(
     scope=app,
-    id=f"Platform-{AwsStage.MANAGEMENT}",
-    env=cdk.Environment(
-        account=AwsAccountId.MANAGEMENT, region=AwsRegion.US_EAST_1
-    ),
-    stage=AwsStage.MANAGEMENT,
+    id=f"Vpn-{AwsStage.MANAGEMENT}",
+    env=cdk.Environment(account=AwsAccountId.MANAGEMENT, region=AwsRegion.US_EAST_1),
     cidr_block="10.144.0.0/16",
-    max_azs=3,
-    nat_gateways=0,
-)
+    create_vpn=True,
+ )
 
 app.synth()
