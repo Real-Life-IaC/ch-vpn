@@ -50,6 +50,12 @@ class B2Vpn(Construct):
         )
         cdk.Tags.of(security_group).add(key="Name", value="VPN Security Group")
 
+        # Certificate manually imported into management account. See README.md
+        server_certificate_arn = ssm.StringParameter.value_for_string_parameter(
+            scope=self,
+            parameter_name="/vpn/server-certificate/arn",
+        )
+
         # Client VPN
         self.client_vpn = vpc.add_client_vpn_endpoint(
             id="ClientVpn",
@@ -57,8 +63,7 @@ class B2Vpn(Construct):
             # IP range that will be allocated to the VPN clients
             # It shouldn't overlap the VPCs or a network that the client device is connected to
             cidr="192.168.0.0/18",
-            # Certificate manually imported into management account. See README.md
-            server_certificate_arn="arn:aws:acm:us-east-1:267631547124:certificate/c7268850-7298-417e-8f13-193f6d1d318a",
+            server_certificate_arn=server_certificate_arn,
             self_service_portal=True,
             authorize_all_users_to_vpc_cidr=False,
             user_based_authentication=ec2.ClientVpnUserBasedAuthentication.federated(
@@ -75,13 +80,18 @@ class B2Vpn(Construct):
 
         cdk.Tags.of(self.client_vpn).add(key="Name", value="Client VPN")
 
+        # The VPN group that we created manually in the IAM Identity Center console
+        sso_vpn_group_id = ssm.StringParameter.value_for_string_parameter(
+            scope=self,
+            parameter_name="/sso/group/vpn/id",
+        )
+
         # Allow the VPN SSO group to connect to the VPN
         self.client_vpn.add_authorization_rule(
             id="AllowVpnAccess",
             description="Allow access to all VPCs",
             cidr="10.0.0.0/8",
-            # The VPN group that we created manually in the IAM Identity Center console
-            group_id="24c81478-10c1-7047-9b7c-e886da56f09e",
+            group_id=sso_vpn_group_id,
         )
 
         # Add a route to for each VPN subnet in the VPC
@@ -155,7 +165,7 @@ class B2SharedTgwAttachment(Construct):
         else:
             transit_gateway_id = ssm.StringParameter.value_from_lookup(
                 scope=self,
-                parameter_name="/platform/vpn/transit-gateway/id",
+                parameter_name="/vpn/transit-gateway/id",
             )
 
         # Do not create the attachment if the transit gateway id is not set
