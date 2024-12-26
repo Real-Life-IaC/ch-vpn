@@ -4,7 +4,11 @@ from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_iam as iam
 from aws_cdk import aws_ssm as ssm
 from constructs import Construct
-from infra.constructs.l2.transit_gateway import L2TransitGateway, L2TransitGatewayAttachment, L2TransitGatewayAttachmentRoutes
+from infra.constructs.l2.transit_gateway import L2TransitGateway
+from infra.constructs.l2.transit_gateway import L2TransitGatewayAttachment
+from infra.constructs.l2.transit_gateway import (
+    L2TransitGatewayAttachmentRoutes,
+)
 
 
 class B2Vpn(Construct):
@@ -48,12 +52,16 @@ class B2Vpn(Construct):
             allow_all_outbound=True,
             description="VPN Security Group",
         )
-        cdk.Tags.of(security_group).add(key="Name", value="VPN Security Group")
+        cdk.Tags.of(security_group).add(
+            key="Name", value="VPN Security Group"
+        )
 
         # Certificate manually imported into management account. See README.md
-        server_certificate_arn = ssm.StringParameter.value_for_string_parameter(
-            scope=self,
-            parameter_name="/vpn/server-certificate/arn",
+        server_certificate_arn = (
+            ssm.StringParameter.value_for_string_parameter(
+                scope=self,
+                parameter_name="/vpn/server-certificate/arn",
+            )
         )
 
         # Client VPN
@@ -61,7 +69,8 @@ class B2Vpn(Construct):
             id="ClientVpn",
             description="VPN Client to access private resources",
             # IP range that will be allocated to the VPN clients
-            # It shouldn't overlap the VPCs or a network that the client device is connected to
+            # It shouldn't overlap the VPCs or a network that the
+            # client device is connected to
             cidr="192.168.0.0/18",
             server_certificate_arn=server_certificate_arn,
             self_service_portal=True,
@@ -75,7 +84,7 @@ class B2Vpn(Construct):
             security_groups=[security_group],
             vpc_subnets=ec2.SubnetSelection(subnet_group_name="VpnSubnet"),
             client_login_banner="This VPN connection expires in 10 hours.",
-            dns_servers=[self.dns_server], # Look at the property below
+            dns_servers=[self.dns_server],  # Look at the property below
         )
 
         cdk.Tags.of(self.client_vpn).add(key="Name", value="Client VPN")
@@ -170,7 +179,8 @@ class B2SharedTgwAttachment(Construct):
 
         # Do not create the attachment if the transit gateway id is not set
         # need to create the parameter manually in all accounts with a dummy value
-        # Then after the transit gateway is created, update the parameter with the correct value
+        # Then after the transit gateway is created,
+        # update the parameter with the correct value
         if not transit_gateway_id.startswith("dummy-value-for-"):
             tgw_attachment = L2TransitGatewayAttachment(
                 scope=self,

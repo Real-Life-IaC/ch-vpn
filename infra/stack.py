@@ -1,9 +1,12 @@
 import aws_cdk as cdk
 
-from constructs import Construct
-from infra.constructs.b2.vpn import B2Vpn, B2SharedTgwAttachment, B2SharedTgw
-from aws_cdk import aws_ssm as ssm
 from aws_cdk import aws_ec2 as ec2
+from aws_cdk import aws_ssm as ssm
+from constructs import Construct
+from infra.constructs.b2.vpn import B2SharedTgw
+from infra.constructs.b2.vpn import B2SharedTgwAttachment
+from infra.constructs.b2.vpn import B2Vpn
+
 
 class VpnStack(cdk.Stack):
     """Create the VPN"""
@@ -46,7 +49,9 @@ class VpnStack(cdk.Stack):
                 scope=self,
                 id="VpnSubnetTgwAttachment",
                 vpc=vpc,
-                subnets=vpc.select_subnets(subnet_group_name="VpnSubnet").subnets,
+                subnets=vpc.select_subnets(
+                    subnet_group_name="VpnSubnet"
+                ).subnets,
                 transit_gateway=shared_tgw.transit_gateway,
             )
         # In the other accounts we use the shared transit gateway to connect to the VPN
@@ -56,7 +61,9 @@ class VpnStack(cdk.Stack):
                 scope=self,
                 id="PrivateSubnetTgwAttachment",
                 vpc=vpc,
-                subnets=vpc.select_subnets(subnet_group_name="PrivateSubnet").subnets,
+                subnets=vpc.select_subnets(
+                    subnet_group_name="PrivateSubnet"
+                ).subnets,
             )
 
         ssm.StringParameter(
@@ -69,7 +76,6 @@ class VpnStack(cdk.Stack):
             description="Transit Gateway Cidr Block - VPN",
             parameter_name="/platform/vpn/transit-gateway/cidr-block",
         )
-
 
         # Add tags to everything in this stack
         cdk.Tags.of(self).add(key="owner", value="Platform")
