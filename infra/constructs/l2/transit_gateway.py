@@ -28,9 +28,15 @@ class L2TransitGateway(ec2.CfnTransitGateway):
             scope=scope,
             id=self.id,
             amazon_side_asn=amazon_side_asn,
-            auto_accept_shared_attachments=bools[auto_accept_shared_attachments],
-            default_route_table_association=bools[default_route_table_association],
-            default_route_table_propagation=bools[default_route_table_propagation],
+            auto_accept_shared_attachments=bools[
+                auto_accept_shared_attachments
+            ],
+            default_route_table_association=bools[
+                default_route_table_association
+            ],
+            default_route_table_propagation=bools[
+                default_route_table_propagation
+            ],
             description=description,
             dns_support=bools[dns_support],
             multicast_support=bools[multicast_support],
@@ -87,7 +93,9 @@ class L2TransitGatewayAttachment(ec2.CfnTransitGatewayAttachment):
         super().__init__(
             scope=scope,
             id=id,
-            subnet_ids=vpc.select_subnets(subnet_group_name="VpnSubnet").subnet_ids,
+            subnet_ids=vpc.select_subnets(
+                subnet_group_name="VpnSubnet"
+            ).subnet_ids,
             vpc_id=vpc.vpc_id,
             transit_gateway_id=transit_gateway_id,
             tags=[
