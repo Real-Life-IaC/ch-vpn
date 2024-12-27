@@ -74,7 +74,7 @@ class VpnStack(cdk.Stack):
             # /24 to include all subnets in the 10.144.140.x range
             string_value="10.144.140.0/24",
             description="Transit Gateway Cidr Block - VPN",
-            parameter_name="/platform/vpn/transit-gateway/cidr-block",
+            parameter_name="/vpn/transit-gateway/cidr-block",
         )
 
         # Add tags to everything in this stack
